@@ -26,7 +26,7 @@ By the end of this module, you will:
 
 ## **Why Focus on JWT Login & Registration Now?**
 
-1. **Incremental Development**: You already have user models and possibly routes from previous modules—now you’ll concentrate solely on **secure authentication** before adding the full BREAD for calculations in Module 14.  
+1. **Incremental Development**: You already have user models and routes from previous modules—now you’ll concentrate solely on **secure authentication** before adding the full BREAD for calculations in Module 14.  
 2. **User-Centric UX**: A minimal front-end for registration/login clarifies how real users (or clients) interact with your secure system.  
 3. **Testing Confidence**: End-to-end (E2E) tests with **Playwright** confirm that the entire login/registration workflow functions as expected under various input conditions.
 
