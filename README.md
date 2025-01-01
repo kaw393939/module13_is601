@@ -1,186 +1,174 @@
-# **Module 10: Secure User Accounts, Pydantic Validation, and CI/CD**
+# **Module 13: JWT Login & Registration with Front-End and Playwright Tests**
 
 ## **Module Overview**
 
-In **Module 10**, you will leverage your foundational knowledge of **databases** (from Module 9) and extend it to build a **secure user model** with **SQLAlchemy**, **Pydantic** validation, and an end-to-end **CI/CD pipeline** that pushes your Docker image to **Docker Hub**. Specifically, you will:
+In **Module 13**, you will **focus specifically** on **user authentication** by creating a minimal **JWT-based** login and registration flow—**without** tackling the full BREAD functionality for calculations (that’s coming in **Module 14**). This module will have you build a **simple front-end** (HTML/CSS/JS) for **login and registration**, add **client-side validation**, and create **Playwright** tests to verify both **positive** (valid inputs) and **negative** (invalid data) scenarios in a **Docker-based CI/CD** pipeline.
 
-1. Create a **User** model that stores **hashed passwords** (no plain text!), enforcing best security practices.  
-2. Validate user data using **Pydantic**, ensuring fields (e.g., email) meet required formats and preventing malformed data from reaching the database.  
-3. Write and run **unit** and **integration tests** in GitHub Actions, where a **PostgreSQL** container is used for real database interactions.  
-4. Finalize a **CI/CD workflow** to build, scan, and deploy your Docker image to Docker Hub, promoting DevOps principles that ensure code quality and security.
+By the end of this module, you will:
 
-By successfully completing Module 10, you will demonstrate mastery of several **Course Learning Outcomes (CLOs)**:
+1. Implement **JWT login** (returning a token for valid credentials).  
+2. Implement **JWT registration** (creating a new user, returning a token or confirmation).  
+3. Build basic **front-end pages** for login and registration, with **client-side validation**.  
+4. Write **Playwright** end-to-end tests covering success (valid registration/login) and failure (invalid data, wrong credentials).  
+5. Continue using **Docker** and **GitHub Actions** to automate tests, pushing an updated image to Docker Hub if all tests pass.
+
+### **Relevant Course Learning Outcomes (CLOs)**
 
 - **CLO 3:** Create Python applications with automated testing.  
 - **CLO 4:** Set up GitHub Actions for Continuous Integration (CI), automating tests and Docker builds to demonstrate DevOps principles.  
 - **CLO 10:** Apply containerization techniques to containerize applications using Docker.  
+- **CLO 11:** Create, consume, and test REST APIs using Python.  
 - **CLO 12:** Integrate Python programs with SQL databases to create and manipulate data.  
 - **CLO 13:** Serialize, deserialize, and validate JSON using Python with Pydantic.  
 - **CLO 14:** Utilize best practices for software development security by implementing secure authentication and authorization techniques, including encryption, hashing, and encoding.
 
 ---
 
-## **Why Focus on Secure User Models, Validation, and CI/CD?**
+## **Why Focus on JWT Login & Registration Now?**
 
-1. **Security from the Start:** Handling passwords securely (hashed + salted) and validating inputs (with Pydantic) helps you avoid critical vulnerabilities.  
-2. **Seamless Development:** Orchestrating tests (unit, integration) via GitHub Actions ensures code reliability and quickly flags regressions.  
-3. **Production Readiness:** By deploying Docker images to Docker Hub, you lay the groundwork for future expansions (Routes in Module 12, UI in Module 13, final project in Module 14).
-
----
-
-## **Module 10 Videos**
-
-1. **Overview Video (on Canvas)**  
-   - Shows how **SQLAlchemy** models and **Pydantic** schemas integrate for secure user data handling.  
-   - Explains basic password hashing with a library (e.g., `bcrypt`).  
-
-2. **Hands-On Video (on Canvas)**  
-   - Demonstrates writing **unit** and **integration tests** that spin up a **PostgreSQL** service in GitHub Actions.  
-   - Explains building a **CI/CD pipeline** that checks for vulnerabilities before pushing to Docker Hub.
+1. **Incremental Development**: You already have user models and possibly routes from previous modules—now you’ll concentrate solely on **secure authentication** before adding the full BREAD for calculations in Module 14.  
+2. **User-Centric UX**: A minimal front-end for registration/login clarifies how real users (or clients) interact with your secure system.  
+3. **Testing Confidence**: End-to-end (E2E) tests with **Playwright** confirm that the entire login/registration workflow functions as expected under various input conditions.
 
 ---
 
-## **Learning Pathway**
+## **Module 13 Outline**
 
-### **Recall**
+1. **JWT-Based Registration and Login**  
+   - **/register** (or `/users/register`): Accepts new user data, returns a JWT or success message upon valid input.  
+   - **/login** (or `/users/login`): Checks credentials, returns a JWT upon success, or an error code upon failure.  
+   - Minimal token logic (e.g., `pyjwt`) to sign user ID/username, maybe with a short expiration.
 
-**Title:** From Raw SQL to an ORM & CI/CD  
-**Grading Type:** Points  
-**Instructions:**  
-1. **Reflect:** How did manually writing SQL in Module 9 inform your approach to database operations? Why might an ORM approach (SQLAlchemy) be more efficient or safer for production?  
-2. **Discussion Prompt:**  
-   - Why is hashing passwords a mandatory practice in modern web apps?  
-   - What benefits do automated tests + Docker deployment offer as your project scales?
+2. **Front-End Pages**  
+   - **register.html** (or integrated in `index.html`): A form prompting user info, including **basic validations** (email format, password length).  
+   - **login.html**: A form for email/password login, again with client-side checks.  
+   - On success, store the JWT (e.g., `localStorage`) for future requests, or just confirm success if you’re not implementing further routes yet.
 
-**Purpose:** These questions transition you from manual SQL operations to a robust, professionally aligned Python stack with continuous delivery.
+3. **Client-Side Validation & Basic Security**  
+   - Email format checks (simple regex or `type="email"`).  
+   - Password length checks.  
+   - Possibly sanitize or carefully handle user-provided data to avoid trivial XSS in the front-end.
 
----
+4. **Playwright E2E Testing**  
+   - **Positive Tests**:  
+     1. **Valid Registration**: Provide correct email/password meeting min length -> success message, user created.  
+     2. **Valid Login**: Provide correct credentials -> server returns JWT, front-end indicates success or stores token.  
+   - **Negative Tests**:  
+     1. **Short Password** or invalid email -> front-end shows error, server route not called or returns 400.  
+     2. **Wrong Credentials** -> server returns 401, front-end shows “invalid login” message.  
+   - Ensure each test asserts UI elements change accordingly (e.g., an error message div, or a success message).
 
-## **Step-by-Step Guide: Secure User Model & CI/CD**
-
-### **1. Creating a Secure User Model (SQLAlchemy)**
-
-- **Model Fields:** `id`, `username`, `email`, `password_hash`, `created_at`.  
-- **Uniqueness Constraints:** Enforce no duplicate usernames or emails.  
-- **Hashed Passwords:** Rely on a hashing library (e.g., `bcrypt`) to store a salted hash instead of plain-text passwords.
-
-### **2. Validating Data with Pydantic**
-
-- **UserCreate Schema:**  
-  - Includes `username`, `email`, `password` in plain text (for creation only).  
-  - Optionally validate minimum password length, email format, etc.  
-
-- **UserRead Schema:**  
-  - Exposes only safe fields (e.g., `id`, `username`, `email`, `created_at`), excluding `password_hash`.
-
-### **3. Database Testing in GitHub Actions**
-
-- **Unit Tests:**  
-  - Verify password hashing/verification methods (ensure plain text != hashed text).  
-  - Check that invalid user data (e.g., duplicate username) is handled gracefully.  
-- **Integration Tests:**  
-  - Spin up a test **PostgreSQL** container in GitHub Actions.  
-  - Insert users, confirm the database rejects invalid inputs, etc.  
-
-### **4. CI/CD Workflow: Build, Scan, Deploy**
-
-- **Test Stage:** Runs all unit/integration tests; fails early on errors.  
-- **Security/Scan Stage:** (Optional) uses a scanner to detect high/critical vulnerabilities in your Docker image.  
-- **Deploy Stage:** Pushes the final image to **Docker Hub** if prior stages succeed.
+5. **Maintaining CI/CD**  
+   - In GitHub Actions:  
+     - Install and run **Playwright**.  
+     - Spin up your back-end + DB container.  
+     - Execute E2E tests. If they pass, push new Docker image to Docker Hub.
 
 ---
 
 ## **Hands-On Assignment**
 
-**Title:** Secure User Model, Pydantic Validation, Database Testing, and Docker Deployment  
+**Title:** JWT Login/Registration with Client-Side Validation & Playwright E2E  
 **Grading Type:** Points  
 
-**Instructions:**
+### **Instructions (Detailed)**:
 
-1. **Set Up Your SQLAlchemy User Model**  
-   - Define columns for `username`, `email`, `password_hash`, ensuring **unique constraints**.  
-   - Incorporate a `created_at` timestamp.
+1. **JWT Login & Registration Routes**  
+   - **/register**:  
+     - Receives user info (username/email, password).  
+     - Validates (check duplicates, hash password, store in DB).  
+     - Returns a JWT or success response.  
+   - **/login**:  
+     - Valid credentials -> return JWT.  
+     - Invalid -> 401 Unauthorized.
 
-2. **Add Pydantic Schemas**  
-   - **UserCreate**: For new user data (`username`, `email`, `password`).  
-   - **UserRead**: For returning user details (omitting `password_hash`).
+2. **Front-End Pages**  
+   - **register.html**:  
+     - Fields for email, password, (optional) confirm password.  
+     - **Client-side** checks (email format, min password length).  
+     - On success (server responds 200/201), display success or store the JWT.  
+   - **login.html**:  
+     - Fields for email, password.  
+     - Client-side checks, minimal.  
+     - On success, store the JWT or display a success message.
 
-3. **Implement Hashing**  
-   - Use a function to hash raw passwords before storing them in `password_hash`.  
-   - Provide a verify function to confirm a plain-text password matches the stored hash.
+3. **Playwright E2E Tests**  
+   - **Positive**:  
+     1. Register with valid data (e.g., email format, pass length), confirm success message.  
+     2. Login with correct credentials, confirm success or token stored.  
+   - **Negative**:  
+     1. Register with short password -> front-end error or 400 from server, verify UI shows error.  
+     2. Login with wrong password -> server returns 401, UI shows invalid credentials message.  
+   - Ensure tests locate form fields, type invalid/valid data, submit, and check resulting UI states or server responses.
 
-4. **Write Unit and Integration Tests**  
-   - Unit tests for hashing, schema validation, etc.  
-   - Integration tests requiring a real database (Postgres container in GitHub Actions) to test user uniqueness, invalid emails, etc.
+4. **CI/CD**  
+   - Retain your Docker-based pipeline from prior modules.  
+   - On each commit:  
+     - GitHub Actions spins up DB + server.  
+     - Runs Playwright tests.  
+     - If all pass, push image to Docker Hub.
 
-5. **Configure CI/CD**  
-   - **Test**: Ensure all tests pass in GitHub Actions.  
-   - **Deploy**: Push your Docker image to **Docker Hub** upon successful tests.
-
-6. **Submit**  
-   - **GitHub Repository Link**: Must include **your own code** (not a copy of the instructor’s repo).  
-   - In your **README**, add:  
-     - A brief overview of how to run tests locally.  
-     - **Links** to your Docker Hub repository (where your image is pushed).  
-   - Remember, this is the same project you’ll build upon in future modules, ultimately forming your final project.
+5. **Submit**  
+   - **GitHub Repo Link** with your own code (JWT routes, front-end forms, E2E tests).  
+   - **README**: Provide instructions for running front-end, E2E tests, and link to your Docker Hub repo.  
+   - Next module (Module 14) will add the full BREAD for calculations to the front-end.
 
 ---
 
 ## **Reflect**
 
-**Title:** Module 10 Reflection  
+**Title:** Module 13 Reflection  
 **Grading Type:** Points  
-**Instructions:**  
-Write **200-300 words** covering:
+**Instructions (300–500 words)**:
 
-1. **CLO 3, 4, 10, 12, 13, 14:** Reflect on how each of these CLOs comes into play (testing, CI/CD, containerization, database integration, data validation, security).  
-2. **Security & Validation:** What new insights did you gain about hashing passwords and validating user input with Pydantic?  
-3. **Challenges & Solutions:** Note any significant hurdles (e.g., Docker Hub authentication, environment variables for tests) and how you resolved them.  
+1. **Front-End Integration**: How did adding a JWT-based login/registration flow (with client-side validation) deepen your full-stack perspective?  
+2. **DevOps & Testing**: Discuss the role of Playwright E2E tests in verifying login/registration flows, especially for both valid/invalid scenarios.  
+3. **Security & Best Practices**: Which client-side checks (password length/email format) and JWT token storage strategies did you employ, and how do these complement server-side security?
 
+4. **Challenges & Solutions**: Summarize any difficulties (JWT generation/verification, storing tokens, Docker environment for E2E) and how you overcame them.
 
 ---
 
 ## **Quiz**
 
-**Title:** Secure User Model & CI/CD Quiz  
+**Title:** JWT Login & Registration, Front-End Validation, Playwright E2E Quiz  
 **Grading Type:** Points  
 
-**Instructions:**  
-1. **Complete the Quiz on Canvas**, covering topics like:  
-   - SQLAlchemy model basics (unique constraints, hashed passwords).  
-   - Pydantic validations and error handling.  
-   - GitHub Actions test containers (PostgreSQL).  
-   - Docker image scanning + deployment to Docker Hub.  
+### **Instructions:**
+
+1. **Complete the Quiz on Canvas**, covering:
+
+   - Minimal JWT flow in FastAPI (login/register).  
+   - Client-side validation for basic input fields.  
+   - Positive/negative test scenarios with Playwright.  
+   - Docker-based CI integration for E2E tests.
 
 2. **Question Types:**  
-   - **Multiple-Choice:** Identify correct usage of hashing or Pydantic validations.  
-   - **Short Answer:** Explain how you’d handle a failing test or a duplicate username scenario.  
-   - **Scenario-Based:** Propose a fix if your pipeline fails to push an image to Docker Hub or if the Postgres container won’t spin up in CI.
+   - **Multiple-Choice**: Identify correct/incorrect approaches to JWT usage or front-end validations.  
+   - **Short Answer**: Summarize how to handle a short password case or invalid login credentials in E2E.
 
 ---
 
 ## **Tips for Success**
 
-1. **Never Store Plain Passwords:** Only store salted, hashed passwords.  
-2. **Validate with Pydantic:** Catch invalid data (e.g., malformed emails, short passwords) early.  
-3. **Test Thoroughly:** Combine unit + integration tests to cover all code paths, ensuring your pipeline is robust.  
-4. **Automate CI/CD:** A fully automated workflow frees you to focus on feature development while maintaining quality.  
-5. **Documentation:** Keep a clear README—this project is your stepping stone for Modules 11–14, culminating in your final project.
+1. **Focus on Simplicity**: A single JWT with minimal payload can suffice. Avoid overcomplicated token refresh or advanced flows for this module.  
+2. **Validate on Both Ends**: Client-side checks for user convenience, but always rely on server-side Pydantic validations.  
+3. **Thorough E2E**: Cover at least one positive and one negative scenario for both registration and login.  
+4. **Document**: Clarify in your README how to spin up the app, run tests, and interpret E2E results.  
+5. **Security**: If storing the JWT in localStorage or sessionStorage, be aware of potential XSS or token exposure.
 
 ---
 
 ## **Submission Deadline**
 
-Please submit the following by **[Insert Deadline Here]**:
+Please provide by **[Insert Deadline Here]**:
 
-1. **GitHub Repository Link** (showing your code, tests, and CI config).  
-2. **Module 10 Reflection** (200-300 words).  
-3. **In your GitHub repo’s README**:  
-   - Links to your Docker Hub repository.  
-   - Instructions on how to run tests locally.  
+1. **GitHub Repo Link**: Containing your updated front-end code (JWT auth calls + client validations) and E2E tests.  
+2. **Module 13 Reflection** (300–500 words).  
+3. **README**: Summarize front-end usage, E2E test steps, and Docker Hub link.
 
 Late submissions may be subject to course policy penalties.
 
 ---
 
-**Congratulations!** You have taken a significant step toward mastering secure user management, robust validation, comprehensive testing, and automated deployments. This foundation will prove invaluable as you evolve your application in Modules 11–14, leading to a polished **final project**.
+**Great Work!** By implementing **JWT-based login/registration**, **client-side validation**, and **Playwright** E2E tests, you deliver a secure, tested authentication flow. In **Module 14**, you’ll expand your front-end to handle the full BREAD calculations, completing your final project’s functionality.
