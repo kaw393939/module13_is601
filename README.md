@@ -112,7 +112,47 @@ By the end of this module, you will:
    - **GitHub Repo Link** with your own code (JWT routes, front-end forms, E2E tests).  
    - **README**: Provide instructions for running front-end, E2E tests, and link to your Docker Hub repo.  
    - Next module (Module 14) will add the full BREAD for calculations to the front-end.
+# **Grading Expectations**
 
+Your submissions for the **Hands-On Assignment** will be evaluated based on the following two criteria:
+
+### **1. Submission Completeness (50 Points)**
+
+- **GitHub Repository Link:**
+  - Provided and accessible.
+  - Contains all necessary files (`JWT` authentication routes, front-end code, Playwright tests, GitHub Actions workflow).
+
+- **Screenshots:**
+  - **GitHub Actions Workflow:** Screenshot showing a successful run of the GitHub Actions workflow.
+  - **Playwright E2E Tests:** Screenshot demonstrating Playwright tests passing.
+  - **Front-End Application:** Screenshot of the login and registration pages functioning correctly.
+
+- **Documentation:**
+  - Includes a reflection document addressing key experiences and challenges faced during the development and testing process.
+  - README file contains instructions on how to run the front-end, execute Playwright tests, and links to the Docker Hub repository.
+
+### **2. Functionality of JWT Authentication and CI/CD Pipeline (50 Points)**
+
+- **JWT Authentication:**
+  - **Registration Endpoint:** `/register` correctly accepts user data, hashes passwords, and stores new users.
+  - **Login Endpoint:** `/login` authenticates users by verifying hashed passwords and returns a JWT upon successful login.
+  - **Pydantic Validation:** User data is validated using Pydantic schemas to ensure data integrity and security.
+
+- **Front-End Integration:**
+  - **Login and Registration Pages:** Functional HTML/CSS/JS pages with client-side validation for email formats and password requirements.
+  - **Token Handling:** JWT tokens are correctly stored (e.g., in `localStorage`) and used for authenticated requests.
+
+- **Playwright E2E Tests:**
+  - **Positive Tests:** Successful user registration and login with valid inputs.
+  - **Negative Tests:** Proper handling of invalid inputs, such as short passwords or incorrect login credentials, with appropriate UI feedback.
+
+- **CI/CD Pipeline:**
+  - **Automated Testing:** Playwright E2E tests run successfully in the GitHub Actions workflow.
+  - **Docker Hub Deployment:** Docker image is built and pushed to Docker Hub automatically upon passing all tests.
+
+---
+
+**Total: 100 Points**
 ---
 
 ## **Reflect**
